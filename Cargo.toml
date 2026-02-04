@@ -1,0 +1,15 @@
+[package]
+name = "cafe-logger"
+version = "0.1.0"
+authors = ["29th-Day"]
+edition = "2024"
+license = "GPL-3.0-or-later"
+keywords = ["wiiu", "homebrew"]
+
+[lib]
+test = false
+bench = false
+
+[dependencies]
+log = "0.4.28"
+cafe-rs = { path = "../cafe-rs", version = "*", features = ["alloc"] }
