@@ -3,17 +3,16 @@
 use cafe_rs::prelude::*;
 use log::{Level, Metadata, Record, SetLoggerError};
 
-use cafe::net::socket::Socket;
 use std::{
     cell::{Cell, RefCell},
     ffi::CString,
-    net::{SocketAddrV4, ToSocketAddrs},
+    net::{Ipv4Addr, ToSocketAddrs, UdpSocket},
 };
 
 pub struct CafeLogger {
     level: Cell<Level>,
     console: Cell<bool>,
-    udp: RefCell<Option<(Socket, SocketAddrV4)>>,
+    udp: RefCell<Option<UdpSocket>>,
 }
 
 unsafe impl Sync for CafeLogger {}
@@ -51,10 +50,11 @@ impl CafeLogger {
     /// Network UDP port
     #[inline]
     pub fn udp(self, address: impl ToSocketAddrs) -> Self {
-        Self::get().udp.replace(Some((
-            Socket::udp().unwrap(),
-            address.to_socket_addrs().unwrap().next().unwrap(),
-        )));
+        Self::get().udp.replace(Some({
+            let udp = UdpSocket::bind((Ipv4Addr::UNSPECIFIED, 0)).unwrap();
+            udp.connect(address).unwrap();
+            udp
+        }));
         self
     }
 
@@ -79,8 +79,8 @@ impl log::Log for CafeLogger {
                     sys::coreinit::debug::report(str.as_ptr());
                 }
             }
-            if let Some((socket, addr)) = self.udp.borrow().as_ref() {
-                socket.send_to(str.as_bytes(), addr, None);
+            if let Some(udp) = self.udp.borrow().as_ref() {
+                let _ = udp.send(str.as_bytes());
             }
         }
     }
