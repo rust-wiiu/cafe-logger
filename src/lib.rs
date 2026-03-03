@@ -77,16 +77,16 @@ impl CafeLogger {
     ///
     /// ```
     /// use cafe_logger::CafeLogger;
-    /// CafeLogger::new().udp("1.2.3.4:4405").init().unwrap();
+    /// CafeLogger::new().udp("1.2.3.4:4405").unwrap().init().unwrap();
     /// ```
     #[inline]
-    pub fn udp(self, address: impl ToSocketAddrs) -> Self {
+    pub fn udp(self, address: impl ToSocketAddrs) -> std::io::Result<Self> {
         Self::get().udp.replace(Some({
-            let udp = UdpSocket::bind("0.0.0.0:0").unwrap();
-            udp.connect(address).unwrap();
+            let udp = UdpSocket::bind("0.0.0.0:0")?;
+            udp.connect(address)?;
             udp
         }));
-        self
+        Ok(self)
     }
 
     /// Initializes the global logger with the current settings of the logger instance. This method MUST be called ONCE in order for the logger to work.
