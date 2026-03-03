@@ -65,6 +65,7 @@ name = "cafe-logger"
 version = "0.1.0"
 dependencies = [
  "cafe-rs",
+ "heapless",
  "log",
 ]
 
@@ -87,6 +88,7 @@ version = "0.1.0"
 dependencies = [
  "cafe-sys",
  "heapless",
+ "log",
 ]
 
 [[package]]
